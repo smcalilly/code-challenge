@@ -9,26 +9,25 @@
     <div class="col-12">
       <h3 id="usaddress-parser"><i class="fa fa-fw fa-map-marker-alt"></i> U.S. address parser</h3>
       <p>Dealing with some messy or unstructured addresses? We can parse them for you.</p>
-      <div class="card card-body bg-light">
+      <div class="card card-body bg-light" id="parser">
         <p><strong>Try it out!</strong> Parse an address in the United States into fields like <code>AddressNumber</code>, <code>StreetName</code> and <code>ZipCode</code>.</p>
-        <form class="form" role="form">
+        <form class="form" role="form" id="address-form">
           {% csrf_token %}
           <input name="address" type="text" class="form-control" id="address" placeholder="123 Main St. Suite 100 Chicago, IL">
           <button id="submit" type="submit" class="btn btn-success mt-3">Parse!</button>
         </form>
       </div>
-      <!-- TODO: Display parsed address components here. -->
       <div id="address-results" style="display:none">
         <h4>Parsing results</h4>
         <p>Address type: <strong><span id="parse-type"></span></strong></p>
-        <table class="table table-bordered">
+        <table class="table table-bordered" id="table">
           <thead>
             <tr>
               <th>Address part</th>
               <th>Tag</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="table-body">
           </tbody>
         </table>
       </div>
@@ -39,7 +38,81 @@
 
 {% block extra_js %}
   <script type="text/javascript">
-    /* TODO: Flesh this out to connect the form to the API and render results
-    in the #address-results div. */
+  (function() {
+    async function getAndRenderAddressComponentsTable(input) {
+      const urlWithParams = `${window.location.href}api/parse/?address=${encodeURIComponent(input)}`;
+
+      const request = new XMLHttpRequest();
+      request.open('GET', urlWithParams, true);
+      request.send();
+
+      request.onload = function() {
+        if (request.status === 200) {
+          const response = JSON.parse(request.response)
+          renderAddressComponentTable(response)
+        } else {
+          const error = JSON.parse(request.response)
+          renderError(error.detail)
+        }
+      }
+
+      request.onerror = function() {
+        renderError()
+      }
+    }
+
+    function renderAddressComponentTable(results) {
+      const div = document.getElementById('address-results');
+      div.style = "display: block;";
+      
+      // add the address type to the display
+      const addressType = document.getElementById('parse-type');
+      addressType.innerHTML = results.address_type ? results.address_type : 'No address type.';
+
+      // render table with the address components
+      const table = document.getElementById('table').getElementsByTagName('tbody')[0];
+
+      for (const [key, value] of Object.entries(results.address_components)) {
+        let row = table.insertRow(table.rows.length);
+
+        let keyCell = row.insertCell(0);
+        let keyText = document.createTextNode(key);
+        keyCell.appendChild(keyText);
+
+        let valueCell = row.insertCell(1);
+        let valueText = document.createTextNode(value);
+        valueCell.appendChild(valueText);
+      }
+    }
+
+    function renderError(error = 'Oh no! Something bad happened.') {
+      const div = document.getElementById('parser');
+      const p = document.createElement('p');
+
+      p.className = 'error';
+      p.innerHTML = error;
+      div.appendChild(p);
+
+      setTimeout(() => p.remove(), 3000);
+    }
+
+    function resetTable() {
+      let oldTableBody = document.getElementById('table-body');
+      let newTableBody = document.createElement('tbody');
+      newTableBody.id = oldTableBody.id
+      oldTableBody.parentNode.replaceChild(newTableBody, oldTableBody)
+    }
+
+    const form = document.getElementById('address-form');
+
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      
+      resetTable()
+
+      const addressInput = event.target.elements.address.value;
+      getAndRenderAddressComponentsTable(addressInput);
+    });
+  })();
   </script>
 {% endblock %}
