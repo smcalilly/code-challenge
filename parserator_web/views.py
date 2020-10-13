@@ -16,23 +16,23 @@ class AddressParse(APIView):
     def get(self, request):
         address = request.query_params.get('address')
 
-        if not address:
-            raise ParseError('Query did not contain an address.')
-        else:
-            parsed_address = self.parse(address)
-            return Response(parsed_address)
+        try:
+            if not address:
+                raise ParseError('Query did not contain an address.')
+            else:
+                address_components, address_type = self.parse(address)
+
+                address_components_response = {
+                    'input_string': address,
+                    'address_components': address_components,
+                    'address_type': address_type
+                }
+
+                return Response(address_components_response)
+        except usaddress.RepeatedLabelError:
+            raise ParseError(f"Unable to process address: {address}")
 
 
     def parse(self, address):
-        try:
-            parsed_address_results = usaddress.tag(address)
-
-            parsed_address = {
-                'input_string': address,
-                'address_components': parsed_address_results[0],
-                'address_type': parsed_address_results[1]
-            }
-
-            return parsed_address
-        except usaddress.RepeatedLabelError:
-            raise ParseError(f"Unable to process address: {address}")
+        address_components, address_type = usaddress.tag(address)
+        return address_components, address_type
