@@ -1,15 +1,34 @@
 import pytest
+import urllib
 
 
-def test_api_parse_succeds(client):
-    # TODO: Finish this test. Send a request to the API and confirm that the
-    # data comes back in the appropriate format.
+def test_api_parse_succeeds(client):
     address_string = '123 main st chicago il'
-    pytest.fail()
+    url = encode_address_for_query_string(address_string)
+    response = client.get(url)
+    
+    assert response.status_code == 200
+    assert response.data.get('input_string') == address_string
+    assert response.data.get('address_type') == 'Street Address'
+    assert isinstance(response.data.get('address_components'), dict)
 
 
 def test_api_parse_raises_error(client):
-    # TODO: Finish this test. The address_string below will raise a
-    # RepeatedLabelError, so ParseAddress.parse() will not be able to parse it.
     address_string = '123 main st chicago il 123 main st'
-    pytest.fail()
+    url = encode_address_for_query_string(address_string)
+    response = client.get(url)
+    assert response.status_code == 400
+
+    url = encode_address_for_query_string('')
+    response = client.get(url)
+    assert response.status_code == 400
+
+    url = encode_address_for_query_string(' ')
+    response = client.get(url)
+    assert response.status_code == 400
+
+
+def encode_address_for_query_string(address_string):
+    query_string = urllib.parse.urlencode({'address': address_string})
+    url = f'/api/parse/?{query_string}'
+    return url
