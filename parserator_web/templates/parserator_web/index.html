@@ -40,8 +40,10 @@
 <script type="text/javascript">
   (function() {
     function getAndRenderAddressComponentsTable(input) {
-      if (input && input.trim().length > 0) {
-        const urlWithParams = `${window.location.href}api/parse/?address=${encodeURIComponent(input.trim())}`;
+      const inputTrimmed = input ? input.trim() : '';
+
+      if (inputTrimmed.length > 0) {
+        const urlWithParams = `${window.location.href}api/parse/?address=${encodeURIComponent(inputTrimmed)}`;
 
         const request = new XMLHttpRequest();
         request.open('GET', urlWithParams, true);
