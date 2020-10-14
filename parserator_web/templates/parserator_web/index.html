@@ -37,27 +37,31 @@
 {% endblock %}
 
 {% block extra_js %}
-  <script type="text/javascript">
+<script type="text/javascript">
   (function() {
-    async function getAndRenderAddressComponentsTable(input) {
-      const urlWithParams = `${window.location.href}api/parse/?address=${encodeURIComponent(input)}`;
+    function getAndRenderAddressComponentsTable(input) {
+      if (input && input.trim().length > 0) {
+        const urlWithParams = `${window.location.href}api/parse/?address=${encodeURIComponent(input.trim())}`;
 
-      const request = new XMLHttpRequest();
-      request.open('GET', urlWithParams, true);
-      request.send();
+        const request = new XMLHttpRequest();
+        request.open('GET', urlWithParams, true);
+        request.send();
 
-      request.onload = function() {
-        if (request.status === 200) {
-          const response = JSON.parse(request.response)
-          renderAddressComponentTable(response)
-        } else {
-          const error = JSON.parse(request.response)
-          renderError(error.detail)
+        request.onload = function() {
+          if (request.status === 200) {
+            const response = JSON.parse(request.response)
+            renderAddressComponentTable(response)
+          } else {
+            const error = JSON.parse(request.response)
+            renderError(error.detail)
+          }
         }
-      }
 
-      request.onerror = function() {
-        renderError()
+        request.onerror = function() {
+          renderError()
+        }
+      } else {
+        renderError('Address input was invalid.')
       }
     }
 
@@ -105,7 +109,7 @@
 
     const form = document.getElementById('address-form');
 
-    form.addEventListener('submit', async function(event) {
+    form.addEventListener('submit', function(event) {
       event.preventDefault();
 
       resetTable()
@@ -114,5 +118,5 @@
       getAndRenderAddressComponentsTable(addressInput);
     });
   })();
-  </script>
+</script>
 {% endblock %}

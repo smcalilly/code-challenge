@@ -14,11 +14,11 @@ class AddressParse(APIView):
     renderer_classes = [JSONRenderer]
 
     def get(self, request):
-        address = request.query_params.get('address')
+        address = request.query_params.get('address').strip()
 
         try:
             if not address:
-                raise ParseError('Query did not contain an address.')
+                raise ParseError('Parsing input did not contain an address.')
             else:
                 address_components, address_type = self.parse(address)
 

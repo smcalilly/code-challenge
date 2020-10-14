@@ -19,8 +19,11 @@ def test_api_parse_raises_error(client):
     response = client.get(url)
     assert response.status_code == 400
 
-    empty_string = ''
-    url = encode_address_for_query_string(empty_string)
+    url = encode_address_for_query_string('')
+    response = client.get(url)
+    assert response.status_code == 400
+
+    url = encode_address_for_query_string(' ')
     response = client.get(url)
     assert response.status_code == 400
 
