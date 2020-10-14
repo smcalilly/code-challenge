@@ -20,14 +20,14 @@
       <div id="address-results" style="display:none">
         <h4>Parsing results</h4>
         <p>Address type: <strong><span id="parse-type"></span></strong></p>
-        <table class="table table-bordered" id="table">
+        <table class="table table-bordered" id="results-table">
           <thead>
             <tr>
               <th>Address part</th>
               <th>Tag</th>
             </tr>
           </thead>
-          <tbody id="table-body">
+          <tbody id="results-table-body">
           </tbody>
         </table>
       </div>
@@ -74,7 +74,7 @@
       addressType.innerHTML = results.address_type ? results.address_type : 'No address type.';
 
       // render table with the address components
-      const table = document.getElementById('table').getElementsByTagName('tbody')[0];
+      const table = document.getElementById('results-table').getElementsByTagName('tbody')[0];
 
       for (const [key, value] of Object.entries(results.address_components)) {
         let row = table.insertRow(table.rows.length);
@@ -101,7 +101,7 @@
     }
 
     function resetTable() {
-      let oldTableBody = document.getElementById('table-body');
+      let oldTableBody = document.getElementById('results-table-body');
       let newTableBody = document.createElement('tbody');
       newTableBody.id = oldTableBody.id
       oldTableBody.parentNode.replaceChild(newTableBody, oldTableBody)
