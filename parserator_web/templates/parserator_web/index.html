@@ -96,15 +96,17 @@
       p.className = 'error';
       p.innerHTML = error;
       div.appendChild(p);
-
-      setTimeout(() => p.remove(), 3000);
     }
 
     function resetTable() {
       let oldTableBody = document.getElementById('results-table-body');
       let newTableBody = document.createElement('tbody');
-      newTableBody.id = oldTableBody.id
+      newTableBody.id = oldTableBody.id;
       oldTableBody.parentNode.replaceChild(newTableBody, oldTableBody)
+    }
+
+    function clearErrorMessage() {
+      document.querySelectorAll('.error').forEach(element => element.remove());
     }
 
     const form = document.getElementById('address-form');
@@ -112,7 +114,8 @@
     form.addEventListener('submit', function(event) {
       event.preventDefault();
 
-      resetTable()
+      clearErrorMessage();
+      resetTable();
 
       const addressInput = event.target.elements.address.value;
       getAndRenderAddressComponentsTable(addressInput);
